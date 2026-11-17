@@ -21,7 +21,7 @@ Use the `build-project` skill in `.claude/skills/build-project/SKILL.md`. In sho
 | 3. Build | Create the project from the matching template below. Small files, clear names, comments for anything not obvious. | App runs locally |
 | 4. Test | Unit tests for logic, end to end browser tests for every acceptance criterion. Run `bash scripts/test.sh <slug>`. Fix until 100% pass. Take screenshots of the main screens (desktop and phone width) and look at them. | All tests pass, screenshots look right |
 | 5. Review | Run the review checklist below. Fix what it finds. Rerun tests. | Checklist clean |
-| 6. Publish | Add the project to `projects/<slug>/project.json`, update the project README, commit, and push. Get the change onto `main` (see Publishing). | Live URL loads and works |
+| 6. Publish | Write `projects/<slug>/project.json`, update the project README, commit, push, and merge to `main` (see Publishing). Run `python3 scripts/ci_status.py` to confirm GitHub's tests passed. | See "Done means" below |
 | 7. Report | Tell Brad: what was built, live link, how to use it, test results, known limits, ideas for next. | Report sent |
 
 Never skip step 4. Never report success while a test fails. If something cannot be done (blocked site, missing account, paid service), say so plainly and say exactly what Brad needs to click.
@@ -61,6 +61,16 @@ projects/<slug>/
 }
 ```
 
+`publish` is the folder copied to GitHub Pages (static only). Python projects use `"publish": "src"`. Vercel projects add `"url"` with the live Vercel address once Brad has imported them. Every project, of every type, is listed on the hub page.
+
+### Done means
+
+| Type | Done when |
+|---|---|
+| `static` | `ci_status.py` passes and `https://bjb81.github.io/claude-projects/<slug>/` loads with no console errors |
+| `python` | `ci_status.py` passes and the README has a direct download link for the script (`https://raw.githubusercontent.com/bjb81/claude-projects/main/projects/<slug>/src/<file>.py`) plus Windows run steps (`py <file>.py`) |
+| `vercel` | `ci_status.py` passes and either the Vercel URL loads, or (first deploy) Brad has the exact import steps |
+
 ## Testing rules
 
 * Web projects: `npm test` must run unit tests (Node's built in `node --test`) and browser tests (`@playwright/test`).
@@ -72,20 +82,23 @@ projects/<slug>/
 * Every acceptance criterion in `DESIGN.md` maps to at least one test. Name tests after the criterion.
 * Python projects: `pytest` with tests in `tests/`.
 * `bash scripts/test.sh` runs every project's tests. `bash scripts/test.sh <slug>` runs one.
-* GitHub runs the same script on every push (`.github/workflows/ci.yml`). A red CI run means the work is not done.
+* GitHub runs the same script on every push: `ci.yml` on branches, `pages.yml` on `main` (tests first, then publish; a failed test stops publishing). Both install only Node, Python, and pytest; `test.sh` installs each project's own dependencies. A red run means the work is not done.
+* Check GitHub's results with `python3 scripts/ci_status.py` (waits for the runs on your latest commit and names any failed step). Logs need a GitHub login, so reproduce failures locally with `bash scripts/test.sh`.
+* Python projects: tests import from `src/` through a `pytest.ini` containing `[pytest]` and `pythonpath = src`. Prefer the standard library; add `requirements.txt` only for real dependencies (pytest is always available). Skip the browser, screenshot, and `package.json` steps.
 
 ## Review checklist (step 5)
 
 | Area | Check |
 |---|---|
 | Works | Every acceptance criterion passes in a browser test |
-| Phone | Layout works at 390 px wide, tap targets at least 44 px |
-| Accessibility | Labels on every input, keyboard usable, color contrast readable |
+| Phone (web) | Layout works at 390 px wide, tap targets at least 44 px |
+| Accessibility (web) | Labels on every input, keyboard usable, color contrast readable |
 | Errors | Bad input shows a clear message, nothing crashes, empty states are friendly |
 | Data | Nothing is lost on reload when it should persist; export exists when data matters |
 | Security | No secrets in code or commits; `.env` is ignored; user input is never inserted as raw HTML |
 | Code | No dead code, no console errors, files under about 300 lines each |
 | Docs | README explains use in plain English |
+| Python | Runs on Windows with `py`; paths use `pathlib`; bad input prints a clear message and exits with code 1, never a traceback |
 
 ## Publishing
 
@@ -111,3 +124,4 @@ projects/<slug>/
 | Serve a folder | `node scripts/serve.mjs projects/<slug>/public <port>` |
 | Screenshot a project | `node scripts/screenshot.mjs <slug>` |
 | Next free test port | `bash scripts/next-port.sh` |
+| GitHub test results for HEAD | `python3 scripts/ci_status.py` |
