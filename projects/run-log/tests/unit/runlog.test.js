@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   pacePerMile, formatPace, formatDuration, formatMiles, weekStart, weekEnd, weekTotals, monthTotals,
   sortRuns, validateRun, chartPoints, csvCell, toCsv, loadRuns, saveRuns, STORAGE_KEY,
+  validateGoal, goalProgress, loadGoal, saveGoal, GOAL_KEY,
 } from '../../public/runlog.js';
 
 // Wednesday 18 November 2026, local time. Week is Mon 16 to Sun 22.
@@ -135,4 +136,57 @@ test('AC8 loadRuns and saveRuns round trip, and bad data loads as empty', () => 
   assert.deepEqual(loadRuns(storage), []);
   store.set(STORAGE_KEY, JSON.stringify([{ date: '2026-11-01', distanceMi: -1, seconds: 10 }, null]));
   assert.deepEqual(loadRuns(storage), []);
+});
+
+test('AC14 goalProgress: 7.1 of 20 miles is 35% with 12.9 to go', () => {
+  const w = weekTotals(RUNS, TODAY);
+  const p = goalProgress(w.miles, 20);
+  assert.equal(p.percent, 35);
+  assert.ok(Math.abs(p.fill - 0.355) < 1e-9);
+  assert.equal(p.remaining, 12.9);
+  assert.equal(p.met, false);
+  assert.deepEqual(goalProgress(0, 20), { percent: 0, fill: 0, remaining: 20, met: false });
+});
+
+test('AC15 validateGoal accepts 1 to 500 miles and rejects anything else', () => {
+  assert.deepEqual(validateGoal(' 20 '), { goal: 20, error: null });
+  assert.deepEqual(validateGoal('12.345'), { goal: 12.35, error: null });
+  assert.equal(validateGoal('1').goal, 1);
+  assert.equal(validateGoal('500').goal, 500);
+  for (const bad of ['', '0', '0.5', '-5', '501', 'abc', 'Infinity', null, undefined]) {
+    const r = validateGoal(bad);
+    assert.equal(r.goal, null, `rejects ${bad}`);
+    assert.match(r.error, /from 1 to 500 miles/);
+  }
+});
+
+test('AC16 loadGoal and saveGoal round trip, remove, and ignore bad data', () => {
+  const store = new Map();
+  const storage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, v), removeItem: (k) => store.delete(k) };
+  assert.equal(loadGoal(storage), null);
+  saveGoal(storage, 25.5);
+  assert.equal(loadGoal(storage), 25.5);
+  saveGoal(storage, null);
+  assert.equal(store.has(GOAL_KEY), false);
+  assert.equal(loadGoal(storage), null);
+  for (const bad of ['{oops', '"20"', '0', '9999']) {
+    store.set(GOAL_KEY, bad);
+    assert.equal(loadGoal(storage), null, `ignores ${bad}`);
+  }
+});
+
+test('AC17 goalProgress at or past the goal is met, full, and never negative', () => {
+  assert.deepEqual(goalProgress(20, 20), { percent: 100, fill: 1, remaining: 0, met: true });
+  const over = goalProgress(25, 20);
+  assert.equal(over.percent, 125);
+  assert.equal(over.fill, 1);
+  assert.equal(over.remaining, 0);
+  assert.equal(over.met, true);
+  // Just short of the goal never rounds up to 100% or met.
+  const close = goalProgress(19.95, 20);
+  assert.equal(close.percent, 99);
+  assert.equal(close.met, false);
+  assert.equal(close.remaining, 0.05);
+  // Floating point sums that land on the goal count as met.
+  assert.equal(goalProgress(0.1 + 0.2 + 2.7, 3).met, true);
 });

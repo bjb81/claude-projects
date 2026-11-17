@@ -1,42 +1,10 @@
-// Browser tests, one or more per acceptance criterion in DESIGN.md.
-// The clock is fixed to Wednesday 18 November 2026 (week Mon 16 to Sun 22).
+// Browser tests for runs, totals, chart, and export: one or more per acceptance criterion in DESIGN.md.
+// Weekly goal tests are in goal.spec.js. Shared setup is in helpers.js.
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
+import { run, RUNS, seed, stored, useFixedClockAndNoConsoleErrors } from './helpers.js';
 
-const KEY = 'runlog.v1';
-const NOW = new Date('2026-11-18T10:00:00');
-const run = (date, distanceMi, seconds, extra = {}) => ({ id: `${date}-${distanceMi}`, date, distanceMi, seconds, avgHr: null, note: '', ...extra });
-const RUNS = [
-  run('2026-11-17', 4, 2280, { avgHr: 152, note: 'Tempo, windy' }),
-  run('2026-11-16', 3.1, 1674, { avgHr: 141 }),
-  run('2026-11-14', 13.1, 7230, { note: 'Long run' }),
-  run('2026-11-02', 5, 3000),
-  run('2026-10-30', 6, 3420),
-];
-
-/** Put runs in storage before the app loads (only once, so reloads keep later changes). */
-async function seed(page, runs) {
-  await page.addInitScript(([key, data]) => {
-    if (!sessionStorage.getItem('seeded')) {
-      localStorage.setItem(key, data);
-      sessionStorage.setItem('seeded', '1');
-    }
-  }, [KEY, JSON.stringify(runs)]);
-}
-
-const stored = (page) => page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? '[]'), KEY);
-
-// AC13: any console error or page error fails the test.
-let consoleErrors;
-test.beforeEach(async ({ page }) => {
-  consoleErrors = [];
-  page.on('console', (msg) => { if (msg.type() === 'error') consoleErrors.push(msg.text()); });
-  page.on('pageerror', (err) => consoleErrors.push(err.message));
-  await page.clock.setFixedTime(NOW);
-});
-test.afterEach(() => {
-  expect(consoleErrors, 'AC13 no console errors').toEqual([]);
-});
+useFixedClockAndNoConsoleErrors();
 
 test('AC1 add a run with every field', async ({ page }) => {
   await page.goto('/');
@@ -188,10 +156,19 @@ test('AC10 phone layout has no sideways scroll and big tap targets', async ({ pa
   await page.goto('/');
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
-  const small = await page.locator('button, input, textarea').evaluateAll((els) =>
+  // Check every visible control, then open the goal form and check its controls too.
+  const tooSmall = () => page.locator('button:visible, input:visible, textarea:visible').evaluateAll((els) =>
     els.map((e) => ({ id: e.id || e.className || e.textContent, h: e.getBoundingClientRect().height, w: e.getBoundingClientRect().width }))
       .filter((b) => b.h < 44 || b.w < 44));
-  expect(small).toEqual([]);
+  expect(await tooSmall()).toEqual([]);
+  await page.getByRole('button', { name: 'Set a weekly goal' }).click();
+  await expect(page.getByRole('button', { name: 'Save goal' })).toBeVisible();
+  expect(await tooSmall()).toEqual([]);
+  await page.getByLabel('Weekly goal (miles)').fill('20');
+  await page.getByRole('button', { name: 'Save goal' }).click();
+  await expect(page.locator('#goal-progress')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+  expect(await tooSmall()).toEqual([]);
   const hit = await page.locator('#chart .hit').first().boundingBox();
   expect(hit.height).toBeGreaterThanOrEqual(44);
 });

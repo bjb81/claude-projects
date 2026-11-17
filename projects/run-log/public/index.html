@@ -27,6 +27,28 @@
           <div><dt>Time</dt><dd data-time>0:00</dd></div>
           <div><dt>Avg pace</dt><dd data-pace>none</dd></div>
         </dl>
+        <div class="goal" id="goal">
+          <div class="goal-progress" id="goal-progress" hidden>
+            <p class="goal-head"><span id="goal-text"></span><span id="goal-left"></span></p>
+            <div class="goal-bar" id="goal-bar" role="progressbar" aria-label="Weekly goal progress" aria-valuemin="0">
+              <span class="goal-fill" id="goal-fill"></span>
+            </div>
+          </div>
+          <button type="button" id="goal-edit" class="btn btn-goal">Set a weekly goal</button>
+          <form id="goal-form" class="goal-form" novalidate hidden>
+            <label for="goal-input">Weekly goal (miles)</label>
+            <div class="goal-row">
+              <input id="goal-input" name="goal" type="number" inputmode="decimal" step="0.1" min="1" max="500" placeholder="e.g. 20" aria-describedby="goal-error">
+              <button type="submit" class="btn btn-ink">Save goal</button>
+            </div>
+            <p class="error" id="goal-error" role="alert"></p>
+            <div class="goal-row">
+              <button type="button" id="goal-cancel" class="btn btn-goal">Cancel</button>
+              <button type="button" id="goal-remove" class="btn btn-goal">Remove goal</button>
+            </div>
+          </form>
+          <p class="goal-status" id="goal-status" role="status" aria-live="polite"></p>
+        </div>
       </article>
       <article class="total total-month" id="month" aria-labelledby="month-title">
         <h2 id="month-title">This month</h2>
