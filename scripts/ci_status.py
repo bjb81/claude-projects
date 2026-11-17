@@ -18,6 +18,21 @@ def get(url):
         return json.load(r)
 
 
+def check_pages(sha):
+    """Confirm GitHub Pages deployed this commit (cloud sessions cannot open github.io)."""
+    deps = get(f"{API}/deployments?sha={sha}&environment=github-pages")
+    if not deps:
+        print("No Pages deployment for this commit (normal for branches; static projects publish from main).")
+        return 0
+    states = get(deps[0]["statuses_url"])
+    state = states[0]["state"] if states else "pending"
+    print(f"Pages deployment: {state}")
+    if state == "success":
+        print("LIVE: https://bjb81.github.io/claude-projects/")
+        return 0
+    return 1
+
+
 def main():
     ref = sys.argv[1] if len(sys.argv) > 1 else "HEAD"
     sha = subprocess.check_output(["git", "rev-parse", ref], text=True).strip()
@@ -29,7 +44,7 @@ def main():
             failed = [r for r in runs if r["conclusion"] != "success"]
             if not failed:
                 print(f"CI PASSED for {sha[:7]}")
-                return 0
+                return check_pages(sha)
             for r in failed:
                 for job in get(f"{API}/actions/runs/{r['id']}/jobs")["jobs"]:
                     for step in job["steps"]:
