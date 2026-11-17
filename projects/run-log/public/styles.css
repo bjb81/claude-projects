@@ -1,0 +1,156 @@
+/* Run Log. Palette and type are explained in DESIGN.md (Visual direction). */
+:root {
+  --fog: #eef1f4;
+  --ink: #17202b;
+  --slate: #5a6675;
+  --rule: #d5dbe2;
+  --hivis: #e4f249;
+  --lane: #1f5fa8;
+  --paper: #ffffff;
+  --alert: #b42318;
+  --num: Bahnschrift, "DIN Alternate", "DIN Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
+  --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--fog);
+  color: var(--ink);
+  font: 16px/1.5 var(--body);
+}
+h1, h2 { margin: 0; line-height: 1.15; }
+h2 { font-size: 1.15rem; }
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem max(1rem, calc((100% - 1080px) / 2 + 1rem));
+  background: var(--ink);
+  color: var(--paper);
+  border-bottom: 4px solid var(--hivis);
+}
+.top h1 { font: 700 1.6rem/1 var(--num); letter-spacing: 0.01em; }
+
+main { max-width: 1080px; margin: 0 auto; padding: 1rem; }
+
+/* Totals: the week panel is the one bold element on the page. */
+.totals { display: grid; grid-template-columns: 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+.total { padding: 1rem 1.1rem; border-radius: var(--radius); background: var(--paper); border: 1px solid var(--rule); }
+.total-week { background: var(--hivis); border-color: var(--hivis); }
+.total h2 { font-size: 1.05rem; }
+.range { margin: 0 0 0.5rem; color: var(--slate); font-size: 0.9rem; }
+.total-week .range { color: #3a4224; }
+.total dl { display: grid; grid-template-columns: repeat(3, auto); gap: 0.25rem 1.25rem; margin: 0; align-items: end; justify-content: start; }
+.total dl > div { display: flex; flex-direction: column-reverse; }
+.total dl > .big { grid-column: 1 / -1; }
+.total dt { font-size: 0.85rem; color: var(--slate); }
+.total-week dt { color: #3a4224; }
+.total dd { margin: 0; font: 600 1.35rem/1.1 var(--num); font-variant-numeric: tabular-nums; }
+.total .big dd { font-size: 3.4rem; font-weight: 700; line-height: 0.95; }
+.total-week .big dd { font-size: 4.2rem; }
+
+/* Panels */
+.layout { display: grid; gap: 1rem; }
+.stack { display: grid; gap: 1rem; align-content: start; min-width: 0; }
+.panel { background: var(--paper); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1rem 1.1rem; min-width: 0; }
+.panel > h2 { margin-bottom: 0.75rem; }
+.hint { margin: -0.5rem 0 0.5rem; color: var(--slate); font-size: 0.9rem; }
+
+/* Form */
+.field { margin: 0 0 0.9rem; padding: 0; border: 0; min-width: 0; }
+.field > label, .field > legend { display: block; font-weight: 600; margin-bottom: 0.3rem; padding: 0; }
+input, textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.6rem 0.75rem;
+  font: inherit;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid #9aa5b1;
+  border-radius: 8px;
+}
+input[type="number"] { font-family: var(--num); font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+textarea { resize: vertical; }
+::placeholder { color: #8a94a1; font-family: var(--body); font-size: 1rem; }
+input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--alert); }
+.time-parts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+.time-parts label { display: flex; align-items: center; gap: 0.35rem; color: var(--slate); }
+.time-parts input { min-width: 0; }
+.error { margin: 0.3rem 0 0; color: var(--alert); font-size: 0.9rem; }
+.error:empty { display: none; }
+.status { margin: 0.6rem 0 0; color: var(--slate); min-height: 1.5em; }
+
+/* Buttons */
+.btn {
+  min-height: 48px;
+  padding: 0.6rem 1.1rem;
+  font: 600 1rem var(--body);
+  border-radius: 8px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary { width: 100%; background: var(--lane); color: var(--paper); }
+.btn-primary:hover { background: #184d89; }
+.btn-ghost { background: transparent; color: var(--paper); border-color: #6b7787; }
+.btn-ghost:hover:not(:disabled) { border-color: var(--hivis); }
+.btn-delete { background: transparent; color: var(--alert); border-color: #e4b4ae; min-height: 44px; padding: 0.4rem 0.9rem; }
+.btn-delete:hover { background: #fdf0ee; }
+:focus-visible { outline: 3px solid var(--lane); outline-offset: 2px; }
+.top :focus-visible { outline-color: var(--hivis); }
+
+/* Chart */
+.chart-box { position: relative; }
+.chart-box svg { display: block; overflow: visible; }
+.chart-box .grid { stroke: #e3e7ec; stroke-width: 1; }
+.chart-box .tick { fill: var(--slate); font: 12px var(--num); }
+.chart-box .line { fill: none; stroke: var(--lane); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart-box .dot { fill: var(--lane); stroke: var(--paper); stroke-width: 2; }
+.chart-box .hit { fill: transparent; cursor: pointer; }
+.chart-box .pt:focus { outline: none; }
+.chart-box .pt.on .dot, .chart-box .pt:focus-visible .dot { r: 7; fill: var(--ink); }
+.tip {
+  position: absolute;
+  width: 160px;
+  padding: 0.4rem 0.6rem;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  line-height: 1.3;
+  pointer-events: none;
+}
+.empty { color: var(--slate); margin: 0.25rem 0; }
+
+/* Run list */
+.run-list { list-style: none; margin: 0; padding: 0; }
+.run {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.15rem 0.75rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid var(--rule);
+}
+.run:first-child { border-top: 0; padding-top: 0; }
+.run-main { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.9rem; }
+.run-date { font-weight: 600; }
+.run-pace { color: var(--slate); }
+.run-pace strong { font: 700 1.5rem var(--num); color: var(--ink); font-variant-numeric: tabular-nums; }
+.run-stats, .run-note { grid-column: 1; margin: 0; color: var(--slate); overflow-wrap: anywhere; }
+.run-note { color: var(--ink); white-space: pre-wrap; }
+.btn-delete { grid-column: 2; grid-row: 1 / span 3; align-self: center; }
+
+@media (min-width: 720px) {
+  .totals { grid-template-columns: 1.3fr 1fr; }
+  .layout { grid-template-columns: minmax(300px, 360px) 1fr; align-items: start; }
+  .add { position: sticky; top: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

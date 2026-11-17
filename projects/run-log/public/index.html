@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17202B">
+  <meta name="description" content="Log runs and see pace, weekly and monthly totals, and your pace trend.">
+  <title>Run Log</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2317202B'/%3E%3Cpath d='M6 22h20' stroke='%23E4F249' stroke-width='4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="top">
+    <h1>Run Log</h1>
+    <button type="button" id="export" class="btn btn-ghost">Export CSV</button>
+  </header>
+
+  <main>
+    <section class="totals" aria-label="Totals">
+      <article class="total total-week" id="week" aria-labelledby="week-title">
+        <h2 id="week-title">This week</h2>
+        <p class="range" data-range></p>
+        <dl>
+          <div class="big"><dt>Miles</dt><dd data-miles>0</dd></div>
+          <div><dt>Runs</dt><dd data-count>0</dd></div>
+          <div><dt>Time</dt><dd data-time>0:00</dd></div>
+          <div><dt>Avg pace</dt><dd data-pace>none</dd></div>
+        </dl>
+      </article>
+      <article class="total total-month" id="month" aria-labelledby="month-title">
+        <h2 id="month-title">This month</h2>
+        <p class="range" data-range></p>
+        <dl>
+          <div class="big"><dt>Miles</dt><dd data-miles>0</dd></div>
+          <div><dt>Runs</dt><dd data-count>0</dd></div>
+          <div><dt>Time</dt><dd data-time>0:00</dd></div>
+          <div><dt>Avg pace</dt><dd data-pace>none</dd></div>
+        </dl>
+      </article>
+    </section>
+
+    <div class="layout">
+      <section class="panel add" aria-labelledby="add-title">
+        <h2 id="add-title">Add a run</h2>
+        <form id="run-form" novalidate>
+          <div class="field">
+            <label for="date">Date</label>
+            <input id="date" name="date" type="date" required aria-describedby="date-error">
+            <p class="error" id="date-error" role="alert"></p>
+          </div>
+          <div class="field">
+            <label for="distance">Distance (miles)</label>
+            <input id="distance" name="distance" type="number" inputmode="decimal" step="0.01" min="0.01" max="200" placeholder="e.g. 3.1" required aria-describedby="distance-error">
+            <p class="error" id="distance-error" role="alert"></p>
+          </div>
+          <fieldset class="field time" aria-describedby="time-error">
+            <legend>Time</legend>
+            <div class="time-parts">
+              <label><input id="hours" name="hours" aria-label="Hours" type="number" inputmode="numeric" min="0" max="99"><span>h</span></label>
+              <label><input id="minutes" name="minutes" aria-label="Minutes" type="number" inputmode="numeric" min="0" max="59"><span>min</span></label>
+              <label><input id="seconds" name="seconds" aria-label="Seconds" type="number" inputmode="numeric" min="0" max="59"><span>sec</span></label>
+            </div>
+            <p class="error" id="time-error" role="alert"></p>
+          </fieldset>
+          <div class="field">
+            <label for="avgHr">Average heart rate (bpm, optional)</label>
+            <input id="avgHr" name="avgHr" type="number" inputmode="numeric" min="30" max="250" placeholder="e.g. 148" aria-describedby="avgHr-error">
+            <p class="error" id="avgHr-error" role="alert"></p>
+          </div>
+          <div class="field">
+            <label for="note">Note (optional)</label>
+            <textarea id="note" name="note" rows="2" maxlength="280" placeholder="e.g. Easy loop, felt strong" aria-describedby="note-error"></textarea>
+            <p class="error" id="note-error" role="alert"></p>
+          </div>
+          <button type="submit" class="btn btn-primary">Save run</button>
+          <p class="status" id="status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <div class="stack">
+        <section class="panel chart" aria-labelledby="chart-title">
+          <h2 id="chart-title">Pace trend</h2>
+          <p class="hint">Minutes per mile. Faster runs sit higher.</p>
+          <div id="chart" class="chart-box"></div>
+        </section>
+
+        <section class="panel runs" aria-labelledby="runs-title">
+          <h2 id="runs-title">Runs</h2>
+          <p class="empty" id="empty">No runs yet. Add your first run with the form.</p>
+          <ol id="run-list" class="run-list"></ol>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <template id="run-row">
+    <li class="run">
+      <div class="run-main">
+        <time class="run-date"></time>
+        <span class="run-pace"><strong data-pace></strong> /mi</span>
+      </div>
+      <p class="run-stats"><span data-miles></span> mi in <span data-time></span><span data-hr></span></p>
+      <p class="run-note"></p>
+      <button type="button" class="btn btn-delete">Delete</button>
+    </li>
+  </template>
+</body>
+</html>
