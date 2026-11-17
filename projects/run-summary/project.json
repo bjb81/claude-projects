@@ -1,0 +1,7 @@
+{
+  "name": "Run Summary",
+  "slug": "run-summary",
+  "type": "python",
+  "description": "Weekly miles, runs, pace, and heart rate from a Run Log CSV export, plus longest run and fastest pace",
+  "publish": "src"
+}
