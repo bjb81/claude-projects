@@ -22,9 +22,17 @@ def main() -> None:
     for meta_file in sorted((ROOT / "projects").glob("*/project.json")):
         proj = meta_file.parent
         meta = json.loads(meta_file.read_text(encoding="utf-8"))
-        if meta.get("type") != "static":
-            continue
         slug = meta.get("slug", proj.name)
+        kind = meta.get("type", "static")
+        if kind != "static":
+            link = meta.get("url") or f"https://github.com/bjb81/claude-projects/tree/main/projects/{slug}"
+            label = {"python": "Python tool", "vercel": "Web app (Vercel)"}.get(kind, kind)
+            cards.append(
+                f'<li><a href="{html.escape(link)}"><strong>{html.escape(meta.get("name", slug))}</strong>'
+                f'<span>{html.escape(label)}: {html.escape(meta.get("description", ""))}</span></a></li>'
+            )
+            print(f"listed {slug} ({kind})")
+            continue
         pkg = proj / "package.json"
         if pkg.exists() and "build" in json.loads(pkg.read_text()).get("scripts", {}):
             subprocess.run(["npm", "run", "build"], cwd=proj, check=True)

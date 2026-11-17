@@ -6,6 +6,8 @@ Websites, web apps, and Python tools designed, coded, tested, and published by C
 
 ## How to start a new project
 
+See [GETTING_STARTED.md](GETTING_STARTED.md) for prompts to copy and what still needs you.
+
 1. Go to [claude.ai/code](https://claude.ai/code) (or the Code tab in the Claude desktop or phone app).
 2. Pick the `bjb81/claude-projects` repository.
 3. Describe what you want in plain English, for example: "Build me a tip calculator I can use on my phone."

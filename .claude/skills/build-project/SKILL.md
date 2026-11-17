@@ -43,10 +43,12 @@ For any UI, read `.claude/skills/frontend-design/SKILL.md` and choose a clear vi
 ## 3. Build
 
 * Static template: `public/index.html`, `public/styles.css`, `public/app.js` (UI), and a pure logic module such as `public/<name>.js` with exported functions and no DOM access, so Node can unit test it.
-* Python template: `src/<name>.py`, `tests/test_<name>.py`, `requirements.txt`, README with Windows run steps (`py -m pip install -r requirements.txt`, `py src\<name>.py`).
+* Python template: `src/<name>.py`, `tests/test_<name>.py`, `pytest.ini` (`[pytest]` then `pythonpath = src`), `requirements.txt` only if there are real dependencies. README: a direct download link to the raw script on GitHub and Windows run steps (`py -m pip install -r requirements.txt` if needed, then `py <name>.py`). Brad does not have the repo on his PC.
 * Keep files small. Escape user text before showing it (use `textContent`, never `innerHTML` with user data).
 
 ## 4. Test
+
+Python projects: write pytest tests for every acceptance criterion, run `bash scripts/test.sh <slug>`, and skip the web items below (package.json, Playwright, screenshots).
 
 Web `package.json`:
 
@@ -96,7 +98,8 @@ Run the review checklist in `CLAUDE.md`. Fix findings, then rerun step 4.
 1. Write `project.json` and `README.md` (what it does, how to use it, live link, how to run tests).
 2. `git add -A && git commit -m "<slug>: <what changed>"`.
 3. Push your branch, then merge into `main`: `git checkout main && git pull && git merge --no-ff <branch> && git push origin main`. If the push to `main` is refused, open a pull request instead and give Brad the link and the one click needed.
-4. Wait about 2 minutes, then confirm `https://bjb81.github.io/claude-projects/<slug>/` loads (fetch it). If GitHub Actions failed, read the log with the GitHub tools available, fix, and push again.
+4. Run `python3 scripts/ci_status.py`. It waits for GitHub's test and publish runs on your commit (about 1 to 2 minutes) and names any failed step. If it fails, reproduce with `bash scripts/test.sh`, fix, and push again.
+5. Check the "Done means" table in `CLAUDE.md` for the project type. For static projects, fetch the live URL and confirm it loads.
 
 ## 7. Report to Brad
 
