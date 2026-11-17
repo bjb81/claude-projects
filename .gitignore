@@ -1,0 +1,14 @@
+node_modules/
+_site/
+test-results/
+playwright-report/
+__pycache__/
+.pytest_cache/
+*.pyc
+.venv/
+.env
+.env.*
+!.env.example
+.claude/settings.local.json
+.DS_Store
+Thumbs.db
