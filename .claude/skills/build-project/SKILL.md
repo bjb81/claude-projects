@@ -12,6 +12,7 @@ Follow every step. The goal is a finished, tested, published project that Brad c
 1. Read `CLAUDE.md` if you have not this session.
 2. Run `ls projects/` to see existing projects. If the request is a change to an existing project, read its `DESIGN.md` and `README.md` first, then skip to step 3 and update the design doc as you go.
 3. Pick a short lowercase slug with hyphens (example: `run-log`).
+4. Create a working branch before changing files: `git checkout -b claude/<slug>` (skip if the session already put you on a `claude/...` branch).
 
 ## 1. Understand
 
@@ -55,7 +56,7 @@ Web `package.json`:
   "type": "module",
   "scripts": {
     "test": "npm run test:unit && npm run test:e2e",
-    "test:unit": "node --test tests/unit/",
+    "test:unit": "node --test \"tests/unit/*.test.js\"",
     "test:e2e": "playwright test"
   },
   "devDependencies": { "@playwright/test": "^1.50.0" }
@@ -68,8 +69,8 @@ Web `playwright.config.js`:
 import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: 'tests/e2e',
-  use: { baseURL: 'http://localhost:4173', channel: 'chrome' },
-  webServer: { command: 'node ../../scripts/serve.mjs public 4173', port: 4173, reuseExistingServer: true },
+  use: { baseURL: 'http://localhost:PORT' },
+  webServer: { command: 'node ../../scripts/serve.mjs public PORT', port: PORT, reuseExistingServer: !process.env.CI },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], channel: 'chrome' } },
     { name: 'phone', use: { ...devices['Pixel 7'], channel: 'chrome' } }
@@ -77,11 +78,13 @@ export default defineConfig({
 });
 ```
 
+Replace `PORT` with a port unique to this project: run `bash scripts/next-port.sh` and use the number it prints.
+
 Then:
 
 1. `cd projects/<slug> && npm install` (commit `package-lock.json`).
 2. `bash scripts/test.sh <slug>` from the repo root. Fix code until everything passes. Do not weaken a test to make it pass unless the test itself is wrong; say so if you change one.
-3. Take screenshots of each main screen at desktop and phone size with Playwright (`page.screenshot`) into `/tmp`, open them with the Read tool, and fix anything that looks broken, cramped, or plain.
+3. Take screenshots: `node scripts/screenshot.mjs <slug>` saves desktop and phone images of the home page to `/tmp/shots/<slug>/`. Pass extra page paths as more arguments if the app has several pages. Open every image with the Read tool and fix anything that looks broken, cramped, or plain. For screens that need clicks first, write a short Playwright script in `/tmp` that uses `channel: 'chrome'`.
 4. Check the browser console has no errors during tests.
 
 ## 5. Review

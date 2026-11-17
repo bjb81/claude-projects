@@ -2,7 +2,7 @@
 // Usage: node scripts/serve.mjs <folder> [port]
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
-import { join, normalize, extname, resolve } from 'node:path';
+import { join, normalize, extname, resolve, sep } from 'node:path';
 
 const root = resolve(process.argv[2] || '.');
 const port = Number(process.argv[3] || 4173);
@@ -17,7 +17,7 @@ createServer(async (req, res) => {
   try {
     const urlPath = decodeURIComponent(new URL(req.url, 'http://x').pathname);
     let file = normalize(join(root, urlPath));
-    if (!file.startsWith(root)) { res.writeHead(403).end(); return; }
+    if (file !== root && !file.startsWith(root + sep)) { res.writeHead(403).end(); return; }
     if ((await stat(file).catch(() => null))?.isDirectory()) file = join(file, 'index.html');
     const body = await readFile(file);
     res.writeHead(200, { 'Content-Type': types[extname(file)] || 'application/octet-stream' }).end(body);

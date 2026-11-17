@@ -1,0 +1,7 @@
+{
+  "name": "Run Log",
+  "slug": "run-log",
+  "type": "static",
+  "description": "Log runs and see pace, weekly and monthly totals, and your pace trend",
+  "publish": "public"
+}

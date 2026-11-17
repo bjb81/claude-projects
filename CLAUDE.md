@@ -7,6 +7,7 @@ This repository holds every project Brad Bell asks Claude to build. Each project
 * Brad is a product leader, not a trained developer. He describes what he wants in plain English and expects a finished, tested, published result.
 * Do the work end to end without asking him technical questions. Make sensible technical choices yourself and note them in the project's `DESIGN.md`.
 * Ask Brad a question only when the answer changes what gets built (who it is for, what it must do, what data it holds) and you cannot make a reasonable assumption. Ask once, with options, then proceed.
+* Skills such as `frontend-design` may suggest confirming choices with the client. For Brad, make the design choice yourself and record it in `DESIGN.md`, unless it changes what gets built.
 * When you report back, use short tables and plain words. No jargon without a one line explanation. No dashes as punctuation.
 
 ## The standard workflow (follow for every new project)
@@ -65,6 +66,9 @@ projects/<slug>/
 * Web projects: `npm test` must run unit tests (Node's built in `node --test`) and browser tests (`@playwright/test`).
 * Playwright must use the installed Chrome: set `use: { channel: 'chrome' }` in `playwright.config.js`. Do not run `npx playwright install`; its download site is blocked in cloud sessions, and Chrome is already installed here and on GitHub's servers.
 * Serve static files in tests with `node ../../scripts/serve.mjs <folder> <port>` from the project folder (no extra packages).
+* Anything that depends on today's date (this week, streaks, due dates) must be tested with a fixed date: `page.clock.setFixedTime(...)` in Playwright and a date argument in unit tests. Never let a test depend on the real clock.
+* Each web project uses its own test port, recorded in its `playwright.config.js`. Get a free one with `bash scripts/next-port.sh`.
+* The `webapp-testing` skill shows Python Playwright examples. In this repo, launch the browser with `channel='chrome'` (Python) or `channel: 'chrome'` (JavaScript); never call `playwright install`.
 * Every acceptance criterion in `DESIGN.md` maps to at least one test. Name tests after the criterion.
 * Python projects: `pytest` with tests in `tests/`.
 * `bash scripts/test.sh` runs every project's tests. `bash scripts/test.sh <slug>` runs one.
@@ -104,4 +108,6 @@ projects/<slug>/
 | Test everything | `bash scripts/test.sh` |
 | Test one project | `bash scripts/test.sh <slug>` |
 | Build the Pages site locally | `python3 scripts/build_site.py` (output in `_site/`) |
-| Serve a folder | `node scripts/serve.mjs projects/<slug>/public 4173` |
+| Serve a folder | `node scripts/serve.mjs projects/<slug>/public <port>` |
+| Screenshot a project | `node scripts/screenshot.mjs <slug>` |
+| Next free test port | `bash scripts/next-port.sh` |
