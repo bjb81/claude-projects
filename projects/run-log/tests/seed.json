@@ -1,0 +1,10 @@
+{
+  "runlog.v1": [
+    {"id": "a", "date": "2026-11-02", "distanceMi": 5, "seconds": 3000, "avgHr": 145, "note": ""},
+    {"id": "b", "date": "2026-11-08", "distanceMi": 6, "seconds": 3480, "avgHr": 144, "note": ""},
+    {"id": "c", "date": "2026-11-14", "distanceMi": 13.1, "seconds": 7230, "avgHr": 158, "note": "Long run"},
+    {"id": "d", "date": "2026-11-16", "distanceMi": 3.1, "seconds": 1674, "avgHr": 141, "note": ""},
+    {"id": "e", "date": "2026-11-17", "distanceMi": 4, "seconds": 2280, "avgHr": 152, "note": "Tempo"}
+  ],
+  "runlog.goal.v1": "20"
+}

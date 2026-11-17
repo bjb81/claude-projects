@@ -67,7 +67,7 @@ projects/<slug>/
 
 | Type | Done when |
 |---|---|
-| `static` | `ci_status.py` passes and `https://bjb81.github.io/claude-projects/<slug>/` loads with no console errors |
+| `static` | `ci_status.py` passes and prints `Pages deployment: success`. Cloud sessions usually cannot open github.io, so this deployment check stands in for opening the page; if you can open it, confirm it loads with no console errors |
 | `python` | `ci_status.py` passes and the README has a direct download link for the script (`https://raw.githubusercontent.com/bjb81/claude-projects/main/projects/<slug>/src/<file>.py`) plus Windows run steps (`py <file>.py`) |
 | `vercel` | `ci_status.py` passes and either the Vercel URL loads, or (first deploy) Brad has the exact import steps |
 
@@ -79,6 +79,7 @@ projects/<slug>/
 * Anything that depends on today's date (this week, streaks, due dates) must be tested with a fixed date: `page.clock.setFixedTime(...)` in Playwright and a date argument in unit tests. Never let a test depend on the real clock.
 * Each web project uses its own test port, recorded in its `playwright.config.js`. Get a free one with `bash scripts/next-port.sh`.
 * The `webapp-testing` skill shows Python Playwright examples. In this repo, launch the browser with `channel='chrome'` (Python) or `channel: 'chrome'` (JavaScript); never call `playwright install`.
+* Tests that measure layout (tap targets, overflow) must check visible elements only; hidden controls measure 0 px.
 * Every acceptance criterion in `DESIGN.md` maps to at least one test. Name tests after the criterion.
 * Python projects: `pytest` with tests in `tests/`.
 * `bash scripts/test.sh` runs every project's tests. `bash scripts/test.sh <slug>` runs one.
@@ -96,7 +97,7 @@ projects/<slug>/
 | Errors | Bad input shows a clear message, nothing crashes, empty states are friendly |
 | Data | Nothing is lost on reload when it should persist; export exists when data matters |
 | Security | No secrets in code or commits; `.env` is ignored; user input is never inserted as raw HTML |
-| Code | No dead code, no console errors, files under about 300 lines each |
+| Code | No dead code, no console errors, source and test files under about 300 lines each (split test files by feature, with shared setup in `tests/e2e/helpers.js`) |
 | Docs | README explains use in plain English |
 | Python | Runs on Windows with `py`; paths use `pathlib`; bad input prints a clear message and exits with code 1, never a traceback |
 

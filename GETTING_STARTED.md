@@ -59,6 +59,7 @@ Build me <what it is> as a Vercel project. Users need to <log in / share data>. 
 | First Vercel project | Sign in at vercel.com with GitHub, import the repo, set Root Directory to `projects/<name>`, click Deploy | Claude cannot create accounts for you |
 | An app needs a secret key (API key, password) | Add it where Claude tells you (claude.ai/code environment secrets, GitHub secrets, or Vercel settings) | Secrets must never be in this public repo |
 | Anything that costs money | Approve and pay yourself | Claude never buys or signs up for you |
+| Claude asks you to check a live page | Open the link once and confirm it looks right | Cloud sessions usually cannot open github.io; Claude confirms the publish through GitHub instead |
 | Claude says a pull request needs merging | Click **Merge** on the link it gives you | Only if a direct publish is ever blocked |
 
 ## Where things are
