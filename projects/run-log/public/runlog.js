@@ -159,3 +159,48 @@ export function loadRuns(storage) {
 export function saveRuns(storage, runs) {
   storage.setItem(STORAGE_KEY, JSON.stringify(runs));
 }
+
+// Weekly mileage goal: one number of miles, stored apart from the runs so the CSV is unchanged.
+export const GOAL_KEY = 'runlog.goal.v1';
+export const GOAL_MIN = 1;
+export const GOAL_MAX = 500;
+
+/** Check a goal typed by the user. Returns { goal, error }; goal is rounded to 2 decimals. */
+export function validateGoal(text) {
+  const raw = String(text ?? '').trim();
+  const goal = Number(raw);
+  if (raw === '' || !Number.isFinite(goal) || goal < GOAL_MIN || goal > GOAL_MAX) {
+    return { goal: null, error: `Enter a goal from ${GOAL_MIN} to ${GOAL_MAX} miles, for example 20.` };
+  }
+  return { goal: Math.round(goal * 100) / 100, error: null };
+}
+
+/**
+ * Progress toward a weekly goal.
+ * percent: whole number, can pass 100. fill: 0 to 1 for the bar. remaining: miles left, never below 0.
+ */
+export function goalProgress(miles, goal) {
+  const ratio = goal > 0 ? miles / goal : 0;
+  return {
+    percent: Math.floor(ratio * 100 + 1e-9),
+    fill: Math.min(1, Math.max(0, ratio)),
+    remaining: Math.max(0, Math.round((goal - miles) * 100) / 100),
+    met: miles >= goal - 1e-9,
+  };
+}
+
+/** Saved goal in miles, or null when none is set or the stored value is bad. */
+export function loadGoal(storage) {
+  try {
+    const value = JSON.parse(storage.getItem(GOAL_KEY) ?? 'null');
+    return typeof value === 'number' && value >= GOAL_MIN && value <= GOAL_MAX ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Save a goal, or remove it when goal is null. */
+export function saveGoal(storage, goal) {
+  if (goal == null) storage.removeItem(GOAL_KEY);
+  else storage.setItem(GOAL_KEY, JSON.stringify(goal));
+}

@@ -5,11 +5,13 @@ import {
   pacePerMile, formatPace, formatDuration, formatMiles, toIsoDate, chartPoints, toCsv,
 } from './runlog.js';
 import { renderChart } from './chart.js';
+import { setupGoal } from './goal.js';
 
 const $ = (sel) => document.querySelector(sel);
 const form = $('#run-form');
 const FIELDS = ['date', 'distance', 'time', 'avgHr', 'note'];
 let runs = loadRuns(localStorage);
+const renderGoal = setupGoal(localStorage, () => weekTotals(runs, new Date()).miles);
 
 function longDate(iso, opts = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) {
   const [y, m, d] = iso.split('-').map(Number);
@@ -61,6 +63,7 @@ function renderList() {
 
 function renderAll() {
   renderTotals();
+  renderGoal();
   renderList();
   renderChart($('#chart'), chartPoints(runs));
 }
